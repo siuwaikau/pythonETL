@@ -10,11 +10,9 @@ Usage example:
 
 from datetime import date
 from znfro_http_get_source import HttpContent
-			
+
 link = "https://www.google.com/"
-contains = [
-				'google',
-			]
+contains = ['google']
 
 archiver = HttpContent()
 
@@ -24,4 +22,3 @@ if responseCode==808:
 else:
 	print(html) 
 
-...
