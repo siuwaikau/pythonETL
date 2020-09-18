@@ -7,6 +7,7 @@ import asyncio
 import hashlib
 import os
 import json
+import time
 
 class HttpContent():
 	_ROOT_CACHE_FOLDER = "../HTTP_ARCHIVE"
@@ -174,9 +175,16 @@ class HttpContent():
 			return 200, source
 			
 			
-	def getCachedSource(self, url, fdate):
+	def getCachedSource(self, url, mustContain, errorContain, fdate):
 		# get date
-		theDate = datetime.strptime(fdate, "%Y-%m-%d")
+		tday = fdate
+		theDate = None;
+		if fdate != None:
+			theDate = datetime.strptime(fdate, "%Y-%m-%d")
+		else:
+			tday = time.strftime("%Y-%m-%d")
+			theDate = datetime.strptime(tday, '%Y-%m-%d');
+		
 		year = theDate.strftime("%Y")
 		
 		# create folder year & date folder if not exist
@@ -184,30 +192,30 @@ class HttpContent():
 			os.makedirs(self._ROOT_CACHE_FOLDER)
 		if not os.path.exists(self._ROOT_CACHE_FOLDER + "/" + year):
 			os.makedirs(self._ROOT_CACHE_FOLDER + "/" + year)
-		if not os.path.exists(self._ROOT_CACHE_FOLDER + "/" + year + "/" + fdate):
-			os.makedirs(self._ROOT_CACHE_FOLDER + "/" + year + "/" + fdate)
+		if not os.path.exists(self._ROOT_CACHE_FOLDER + "/" + year + "/" + tday):
+			os.makedirs(self._ROOT_CACHE_FOLDER + "/" + year + "/" + tday)
 			
 		# get domain
 		domain = urlparse(url).netloc
 		
 		# create domain folder if not exist
-		if not os.path.exists(self._ROOT_CACHE_FOLDER + "/" + year + "/" + fdate + "/" + domain):
-			os.makedirs(self._ROOT_CACHE_FOLDER + "/" + year + "/" + fdate + "/" + domain)
+		if not os.path.exists(self._ROOT_CACHE_FOLDER + "/" + year + "/" + tday + "/" + domain):
+			os.makedirs(self._ROOT_CACHE_FOLDER + "/" + year + "/" + tday + "/" + domain)
 			
 		# get md5 url as filename 
 		h = hashlib.md5(bytes(url, 'utf-8'))
 		filename = h.hexdigest() + ".html";
 		
-		archiveFilename = self._ROOT_CACHE_FOLDER + "/" + year + "/" + fdate + "/" + domain + "/" + filename;
+		archiveFilename = self._ROOT_CACHE_FOLDER + "/" + year + "/" + tday + "/" + domain + "/" + filename;
 		if os.path.exists(archiveFilename): 
 			# read source
 			file = open(archiveFilename)
 			html = file.read()
 			file.close()
 			
-			return html
+			return 200, html
 		else:
-			return None
+			return self.getSource(url, False, mustContain, errorContain)
 			
 			
 	def closeBrowser(self):
